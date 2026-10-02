@@ -24,7 +24,7 @@ logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s [servidor] %(threadName)s %(message)s")
 
 # ----------------------------------------------------------------- estado compartido
-estado = {"inventario": {"manzana": 100, "pera": 100}, "operaciones": 0}
+estado = {"puntajes": {"david": 0, "felipe": 0}, "operaciones": 0}
 lock = threading.Lock()
 
 
@@ -41,41 +41,34 @@ def seccion_critica():
 
 
 # ----------------------------------------------------------------- operaciones del dominio
-def op_listar(arg):
+def op_tabla(arg):
     with seccion_critica():
-        items = " ".join(f"{k}:{v}" for k, v in sorted(estado["inventario"].items()))
-    return f"OK {items}"
+        filas = " ".join(f"{k}:{v}" for k, v in sorted(estado["puntajes"].items()))
+    return f"OK {filas}"
 
+def op_unir(arg):
+    jugador = arg.strip().lower()
+    if not jugador or " " in arg.strip():
+        return "ERROR FORMATO UNIR <jugador>"
+    with seccion_critica():
+        if jugador in estado["puntajes"]:
+            return "ERROR JUGADOR_YA_EXISTE"
+        estado["puntajes"][jugador] = 0
+    return f"OK {jugador} 0"
 
-def op_agregar(arg):
+def op_anotar(arg):
     partes = arg.split()
     if len(partes) != 2 or not partes[1].isdigit():
-        return "ERROR FORMATO AGREGAR <item> <cantidad>"
-    item, cant = partes[0].lower(), int(partes[1])
+        return "ERROR FORMATO ANOTAR <jugador> <puntos>"
+    jugador, puntos = partes[0].lower(), int(partes[1])
     with seccion_critica():
-        actual = estado["inventario"].get(item, 0)
-        time.sleep(0.001)                      # ventana para observar la carrera sin Lock
-        estado["inventario"][item] = actual + cant
-        nuevo = estado["inventario"][item]
-    return f"OK {item} {nuevo}"
-
-
-def op_quitar(arg):
-    partes = arg.split()
-    if len(partes) != 2 or not partes[1].isdigit():
-        return "ERROR FORMATO QUITAR <item> <cantidad>"
-    item, cant = partes[0].lower(), int(partes[1])
-    with seccion_critica():
-        actual = estado["inventario"].get(item)
-        if actual is None:
-            return "ERROR ITEM_NO_EXISTE"
-        if actual < cant:
-            return f"ERROR STOCK_INSUFICIENTE {actual}"
-        time.sleep(0.001)
-        estado["inventario"][item] = actual - cant
-        nuevo = estado["inventario"][item]
-    return f"OK {item} {nuevo}"
-
+        if jugador not in estado["puntajes"]:
+            return "ERROR JUGADOR_NO_EXISTE"
+        actual = estado["puntajes"][jugador]
+        time.sleep(0.001)  # ventana para observar la carrera sin Lock
+        estado["puntajes"][jugador] = actual + puntos
+        nuevo = estado["puntajes"][jugador]
+    return f"OK {jugador} {nuevo}"
 
 def op_espera(arg):
     try:
@@ -87,9 +80,9 @@ def op_espera(arg):
 
 
 OPERACIONES = {
-    "LISTAR": op_listar,
-    "AGREGAR": op_agregar,
-    "QUITAR": op_quitar,
+    "TABLA": op_tabla,
+    "UNIR": op_unir,
+    "ANOTAR": op_anotar,
     "ESPERA": op_espera,
 }
 
