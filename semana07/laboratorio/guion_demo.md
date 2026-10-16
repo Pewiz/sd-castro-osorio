@@ -15,11 +15,13 @@ Equipo Castro - Osorio. Carpeta: `semana07/laboratorio`.
 ## Antes
 
 ```powershell
-cd c:\Users\felip\OneDrive\Documentos\GitHub\sd-castro-osorio\semana07\laboratorio
+cd semana07\laboratorio
 docker compose up -d --build
 docker compose ps
 docker compose exec cliente python cliente_http.py GET /jugadores
 ```
+
+
 
 ## 2:00 — protocolo
 
