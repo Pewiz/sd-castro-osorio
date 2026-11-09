@@ -1,0 +1,32 @@
+# Demo del jueves, semana 11. Semánticas de fallo con JSON-RPC.
+# Cambiar la falla sin editar archivos
+#   FALLA=primera docker compose up -d servidor
+#   FALLA=primera DEDUP=1 docker compose up -d servidor
+services:
+  servidor:
+    build: .
+    container_name: sd_servidor
+    command: uvicorn rpc_servidor:app --host 0.0.0.0 --port 8000 --log-level warning
+    environment:
+      FALLA: ${FALLA:-no}
+      DEMORA: ${DEMORA:-3}
+      DEDUP: ${DEDUP:-0}
+    ports:
+      - "8000:8000"
+    networks: [sd_net]
+
+  cliente:
+    build: .
+    container_name: sd_cliente
+    command: sleep infinity
+    environment:
+      SERVIDOR_HOST: servidor
+      SERVIDOR_PUERTO: "8000"
+      TIMEOUT_CLIENTE: ${TIMEOUT_CLIENTE:-2}
+      REINTENTOS: ${REINTENTOS:-0}
+    depends_on: [servidor]
+    networks: [sd_net]
+
+networks:
+  sd_net:
+    name: sd_net

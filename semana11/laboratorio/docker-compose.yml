@@ -1,0 +1,39 @@
+# Laboratorio semana 11. Migración del servicio a gRPC.
+# Cambiar la falla sin editar archivos
+#   FALLA=siempre docker compose up -d servidor
+#   FALLA=siempre DEDUP=1 docker compose up -d servidor
+services:
+  servidor:
+    build: .
+    image: sd_grpc:semana11
+    container_name: sd_servidor
+    command: python servidor_grpc.py
+    environment:
+      SERVIDOR_PUERTO: "50051"
+      FALLA: ${FALLA:-no}
+      DEMORA: ${DEMORA:-3}
+      DEDUP: ${DEDUP:-0}
+    volumes:
+      - .:/app
+    ports:
+      - "50051:50051"
+    networks: [sd_net]
+
+  cliente:
+    build: .
+    image: sd_grpc:semana11
+    container_name: sd_cliente
+    command: sleep infinity
+    environment:
+      SERVIDOR_HOST: servidor
+      SERVIDOR_PUERTO: "50051"
+      TIMEOUT_CLIENTE: ${TIMEOUT_CLIENTE:-2}
+      REINTENTOS: ${REINTENTOS:-0}
+    volumes:
+      - .:/app
+    depends_on: [servidor]
+    networks: [sd_net]
+
+networks:
+  sd_net:
+    name: sd_net

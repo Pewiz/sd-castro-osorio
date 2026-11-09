@@ -1,0 +1,49 @@
+// Contrato del servicio de juegos (tabla de puntajes), semana 11.
+//
+// Reglas del contrato
+//  1. Cada campo tiene un número. Ese número es lo que viaja por la red,
+//     no el nombre. Un número usado no se reutiliza nunca.
+//  2. Las operaciones que modifican estado llevan id_solicitud, la clave que
+//     permite al servidor reconocer un reintento (semántica at-most-once).
+//  3. Para agregar un campo nuevo se usa un número nuevo. Para eliminar uno
+//     se marca como reserved.
+
+syntax = "proto3";
+
+package partida.v1;
+
+service Partida {
+  // Solo lectura, idempotente, se puede reintentar sin miedo
+  rpc Tabla (TablaSolicitud) returns (TablaRespuesta);
+
+  // Modifican estado, necesitan id_solicitud
+  rpc Unir   (UnirSolicitud)   returns (JugadorRespuesta);
+  rpc Anotar (AnotarSolicitud) returns (JugadorRespuesta);   // NO idempotente, suma cada vez
+}
+
+message TablaSolicitud {}
+
+message Jugador {
+  string jugador = 1;
+  int32  puntos  = 2;
+}
+
+message TablaRespuesta {
+  repeated Jugador jugadores = 1;
+}
+
+message UnirSolicitud {
+  string id_solicitud = 1;   // lo genera el cliente, se repite igual en cada reintento
+  string jugador      = 2;
+}
+
+message AnotarSolicitud {
+  string id_solicitud = 1;   // lo genera el cliente, se repite igual en cada reintento
+  string jugador      = 2;
+  int32  puntos       = 3;
+}
+
+message JugadorRespuesta {
+  string jugador = 1;
+  int32  puntos  = 2;
+}
