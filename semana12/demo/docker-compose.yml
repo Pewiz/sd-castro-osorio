@@ -1,0 +1,42 @@
+# Semana 12, objetos distribuidos con Pyro5.
+# Tres nodos en la red sd_net. Nada se publica hacia el host.
+#   nombres   servidor de nombres de Pyro5 (puerto 9090)
+#   servidor  daemon con los objetos del equipo (puerto 9100)
+#   cliente   contenedor para ejecutar cliente_pyro.py
+services:
+  nombres:
+    build: .
+    container_name: sd_nombres
+    command: python -m Pyro5.nameserver -n nombres -p 9090 -x
+    networks: [sd_net]
+
+  servidor:
+    build: .
+    container_name: sd_servidor
+    command: python servidor_pyro.py
+    environment:
+      SERVIDOR_HOST: servidor
+      SERVIDOR_PUERTO: "9100"
+      NOMBRES_HOST: nombres
+      NOMBRES_PUERTO: "9090"
+      EQUIPO: ${EQUIPO:-referencia}
+      MODO: ${MODO:-single}
+      POR_VALOR: ${POR_VALOR:-0}
+      REREGISTRO: ${REREGISTRO:-0}
+    depends_on: [nombres]
+    networks: [sd_net]
+
+  cliente:
+    build: .
+    container_name: sd_cliente
+    command: sleep infinity
+    environment:
+      NOMBRES_HOST: nombres
+      NOMBRES_PUERTO: "9090"
+      EQUIPO: ${EQUIPO:-referencia}
+    depends_on: [servidor]
+    networks: [sd_net]
+
+networks:
+  sd_net:
+    name: sd_net
