@@ -1,0 +1,4 @@
+mecanismo,operacion,n,p50_ms,p95_ms,media_ms,max_ms,respuesta_bytes
+pyro,tabla,200,0.63,0.83,0.64,2.78,48
+pyro,tabla,200,0.34,0.49,0.35,1.01,48
+pyro,tabla,200,0.3,0.39,0.32,1.27,48
