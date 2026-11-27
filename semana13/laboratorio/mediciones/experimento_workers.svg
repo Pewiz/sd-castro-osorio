@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="360" font-family="sans-serif" font-size="12">
+<rect width="520" height="360" fill="white"/>
+<text x="260.0" y="22" text-anchor="middle" font-size="15">Speedup S(p) = T(1) / T(p)</text>
+<line x1="50" y1="310.0" x2="470" y2="310.0" stroke="#ddd"/>
+<text x="42" y="314.0" text-anchor="end">0</text>
+<line x1="50" y1="288.3" x2="470" y2="288.3" stroke="#ddd"/>
+<text x="42" y="292.3" text-anchor="end">1</text>
+<line x1="50" y1="266.7" x2="470" y2="266.7" stroke="#ddd"/>
+<text x="42" y="270.7" text-anchor="end">2</text>
+<line x1="50" y1="245.0" x2="470" y2="245.0" stroke="#ddd"/>
+<text x="42" y="249.0" text-anchor="end">3</text>
+<line x1="50" y1="223.3" x2="470" y2="223.3" stroke="#ddd"/>
+<text x="42" y="227.3" text-anchor="end">4</text>
+<line x1="50" y1="201.7" x2="470" y2="201.7" stroke="#ddd"/>
+<text x="42" y="205.7" text-anchor="end">5</text>
+<line x1="50" y1="180.0" x2="470" y2="180.0" stroke="#ddd"/>
+<text x="42" y="184.0" text-anchor="end">6</text>
+<line x1="50" y1="158.3" x2="470" y2="158.3" stroke="#ddd"/>
+<text x="42" y="162.3" text-anchor="end">7</text>
+<line x1="50" y1="136.7" x2="470" y2="136.7" stroke="#ddd"/>
+<text x="42" y="140.7" text-anchor="end">8</text>
+<line x1="50" y1="115.0" x2="470" y2="115.0" stroke="#ddd"/>
+<text x="42" y="119.0" text-anchor="end">9</text>
+<line x1="50" y1="93.3" x2="470" y2="93.3" stroke="#ddd"/>
+<text x="42" y="97.3" text-anchor="end">10</text>
+<line x1="50" y1="71.7" x2="470" y2="71.7" stroke="#ddd"/>
+<text x="42" y="75.7" text-anchor="end">11</text>
+<line x1="50" y1="50.0" x2="470" y2="50.0" stroke="#ddd"/>
+<text x="42" y="54.0" text-anchor="end">12</text>
+<text x="50.0" y="328" text-anchor="middle">1</text>
+<text x="88.2" y="328" text-anchor="middle">2</text>
+<text x="126.4" y="328" text-anchor="middle">3</text>
+<text x="164.5" y="328" text-anchor="middle">4</text>
+<text x="202.7" y="328" text-anchor="middle">5</text>
+<text x="240.9" y="328" text-anchor="middle">6</text>
+<text x="279.1" y="328" text-anchor="middle">7</text>
+<text x="317.3" y="328" text-anchor="middle">8</text>
+<text x="355.5" y="328" text-anchor="middle">9</text>
+<text x="393.6" y="328" text-anchor="middle">10</text>
+<text x="431.8" y="328" text-anchor="middle">11</text>
+<text x="470.0" y="328" text-anchor="middle">12</text>
+<line x1="50" y1="310" x2="470" y2="310" stroke="black"/>
+<line x1="50" y1="50" x2="50" y2="310" stroke="black"/>
+<text x="260.0" y="348" text-anchor="middle">workers p</text>
+<polyline fill="none" stroke="gray" stroke-width="2" stroke-dasharray="8,6" points="50.0,288.3 470.0,50.0"/>
+<polyline fill="none" stroke="#c0282d" stroke-width="3" points="50.0,288.3 88.2,269.3 164.5,243.6 240.9,225.2 317.3,217.3 470.0,214.5"/>
+<rect x="45.0" y="283.3" width="10" height="10" fill="#c0282d"/>
+<text x="50.0" y="278.3" text-anchor="middle">1.00</text>
+<rect x="83.2" y="264.3" width="10" height="10" fill="#c0282d"/>
+<text x="88.2" y="259.3" text-anchor="middle">1.88</text>
+<rect x="159.5" y="238.6" width="10" height="10" fill="#c0282d"/>
+<text x="164.5" y="233.6" text-anchor="middle">3.07</text>
+<rect x="235.9" y="220.2" width="10" height="10" fill="#c0282d"/>
+<text x="240.9" y="215.2" text-anchor="middle">3.91</text>
+<rect x="312.3" y="212.3" width="10" height="10" fill="#c0282d"/>
+<text x="317.3" y="207.3" text-anchor="middle">4.28</text>
+<rect x="465.0" y="209.5" width="10" height="10" fill="#c0282d"/>
+<text x="470.0" y="204.5" text-anchor="middle">4.41</text>
+<line x1="60" y1="50" x2="90" y2="50" stroke="gray" stroke-width="2" stroke-dasharray="8,6"/>
+<text x="96" y="54">Ideal</text>
+<line x1="60" y1="68" x2="90" y2="68" stroke="#c0282d" stroke-width="3"/>
+<text x="96" y="72">Medido</text>
+</svg>

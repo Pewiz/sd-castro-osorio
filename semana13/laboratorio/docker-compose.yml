@@ -1,0 +1,121 @@
+# Semana 13, colas de mensajes y master-worker con RabbitMQ.
+# name fija el prefijo de las réplicas (semana13-procesador-2, semana13-worker-1).
+#
+# Lo de la semana 12, sin cambios
+#   nombres     servidor de nombres de Pyro5 (puerto 9090)
+#   servidor    daemon con los objetos del equipo (puerto 9100)
+#   cliente     contenedor para ejecutar cliente_pyro.py
+# Lo nuevo, todo habla AMQP con el broker por TCP 5672 dentro de sd_net
+#   rabbitmq    broker, consola web en localhost:15672 (guest / guest)
+#   procesador  consume 'operaciones', se escala con --scale procesador=3
+#   worker      consume 'tareas_primos', se escala con --scale worker=N
+#   publicador, master y graficar son de un solo uso, se ejecutan con run --rm
+name: semana13
+
+services:
+  nombres:
+    build: .
+    container_name: sd_nombres
+    command: python -m Pyro5.nameserver -n nombres -p 9090 -x
+    networks: [sd_net]
+
+  servidor:
+    build: .
+    container_name: sd_servidor
+    command: python servidor_pyro.py
+    environment:
+      SERVIDOR_HOST: servidor
+      SERVIDOR_PUERTO: "9100"
+      NOMBRES_HOST: nombres
+      NOMBRES_PUERTO: "9090"
+      EQUIPO: ${EQUIPO:-referencia}
+      MODO: ${MODO:-single}
+      POR_VALOR: ${POR_VALOR:-0}
+      REREGISTRO: ${REREGISTRO:-0}
+    depends_on: [nombres]
+    networks: [sd_net]
+
+  cliente:
+    build: .
+    container_name: sd_cliente
+    command: sleep infinity
+    environment:
+      NOMBRES_HOST: nombres
+      NOMBRES_PUERTO: "9090"
+      EQUIPO: ${EQUIPO:-referencia}
+    depends_on: [servidor]
+    networks: [sd_net]
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: sd_rabbitmq
+    hostname: rabbitmq        # el nodo se llama rabbit@rabbitmq y encuentra sus datos al reiniciar
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    networks: [sd_net]
+
+  procesador:
+    build:
+      context: .
+      dockerfile: Dockerfile.colas
+    command: python procesador.py
+    environment:
+      AUTO_ACK: ${AUTO_ACK:-0}
+      DEMORA: ${DEMORA:-3}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks: [sd_net]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.colas
+    command: python worker.py
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks: [sd_net]
+
+  publicador:
+    build:
+      context: .
+      dockerfile: Dockerfile.colas
+    entrypoint: ["python", "publicador.py"]
+    profiles: [herramientas]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks: [sd_net]
+
+  master:
+    build:
+      context: .
+      dockerfile: Dockerfile.colas
+    entrypoint: ["python", "master.py"]
+    profiles: [herramientas]
+    volumes:
+      - ./mediciones:/app/mediciones
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks: [sd_net]
+
+  graficar:
+    build:
+      context: .
+      dockerfile: Dockerfile.colas
+    entrypoint: ["python", "graficar.py"]
+    profiles: [herramientas]
+    volumes:
+      - ./mediciones:/app/mediciones
+    networks: [sd_net]
+
+networks:
+  sd_net:
+    name: sd_net

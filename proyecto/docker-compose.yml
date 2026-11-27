@@ -1,0 +1,86 @@
+# Proyecto integrador, servicio de juegos (tabla de puntajes) con cola de jugadas.
+# Todo en la red sd_net. Solo se publica la consola web de RabbitMQ (15672).
+#
+#   nombres     servidor de nombres de Pyro5 (9090)
+#   servidor    daemon Pyro5 con Juegos y Partida, el único nodo con estado (9100)
+#   cliente     contenedor para cliente_pyro.py (consultas y partidas)
+#   rabbitmq    broker, cola durable 'operaciones' (AMQP 5672)
+#   procesador  2 réplicas sin estado, consumen la cola y llaman a Juegos.aplicar
+#   publicador  de un solo uso (run --rm), deja jugadas en la cola
+name: proyecto
+
+services:
+  nombres:
+    build: .
+    container_name: sd_nombres
+    command: python -m Pyro5.nameserver -n nombres -p 9090 -x
+    networks: [sd_net]
+
+  servidor:
+    build: .
+    container_name: sd_servidor
+    command: python servidor_pyro.py
+    environment:
+      SERVIDOR_HOST: servidor
+      SERVIDOR_PUERTO: "9100"
+      NOMBRES_HOST: nombres
+      NOMBRES_PUERTO: "9090"
+      EQUIPO: ${EQUIPO:-castro-osorio}
+      MODO: ${MODO:-single}
+      REREGISTRO: ${REREGISTRO:-5}
+    depends_on: [nombres]
+    networks: [sd_net]
+
+  cliente:
+    build: .
+    container_name: sd_cliente
+    command: sleep infinity
+    environment:
+      NOMBRES_HOST: nombres
+      NOMBRES_PUERTO: "9090"
+      EQUIPO: ${EQUIPO:-castro-osorio}
+    depends_on: [servidor]
+    networks: [sd_net]
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: sd_rabbitmq
+    hostname: rabbitmq        # el nodo se llama rabbit@rabbitmq y encuentra sus datos al reiniciar
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+    networks: [sd_net]
+
+  procesador:
+    build: .
+    command: python procesador.py
+    deploy:
+      replicas: 2
+    environment:
+      NOMBRES_HOST: nombres
+      NOMBRES_PUERTO: "9090"
+      EQUIPO: ${EQUIPO:-castro-osorio}
+      DEMORA: ${DEMORA:-0}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      servidor:
+        condition: service_started
+    networks: [sd_net]
+
+  publicador:
+    build: .
+    entrypoint: ["python", "publicador.py"]
+    profiles: [herramientas]
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks: [sd_net]
+
+networks:
+  sd_net:
+    name: sd_net
